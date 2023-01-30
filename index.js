@@ -34,6 +34,19 @@ io.on("connection", (socket) => {
       io.to(roomId).emit("createMessage", message, userName);
     });
   });
+  socket.emit("me", socket.id);
+
+	socket.on("disconnect", () => {
+		socket.broadcast.emit("callEnded")
+	});
+
+	socket.on("callUser", ({ userToCall, signalData, from, name }) => {
+		io.to(userToCall).emit("callUser", { signal: signalData, from, name });
+	});
+
+	socket.on("answerCall", (data) => {
+		io.to(data.to).emit("callAccepted", data.signal)
+	});
 });
 
 server.listen(process.env.PORT || 8000);
